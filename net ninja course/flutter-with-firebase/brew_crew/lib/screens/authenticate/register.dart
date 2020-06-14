@@ -14,9 +14,11 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
 
   final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
 
   String email = '';
   String password = '';
+  String error = '';
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +41,14 @@ class _RegisterState extends State<Register> {
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 50),
         child: Form(
+          key: _formKey,
           child: Column(
             children: <Widget>[
               SizedBox(height: 20,),
               TextFormField(
+                validator: (val) {
+                  return val.isEmpty ? 'Please fill out the email feild.' : null;
+                },
                 onChanged: (val) {
                   setState(() {
                     email = val;
@@ -51,6 +57,9 @@ class _RegisterState extends State<Register> {
               ),
               SizedBox(height: 20,),
               TextFormField(
+                validator: (val) {
+                  return val.length < 6 ? 'Password too short.' : null;
+                },
                 obscureText: true,
                 onChanged: (val) {
                   setState(() {
@@ -66,10 +75,19 @@ class _RegisterState extends State<Register> {
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () async {
-                  print(email);
-                  print(password);
+                  if (_formKey.currentState.validate()){
+                    dynamic result = await _auth.
+                    registerWithEmailAndPassword(email, password);
+                    if (result == null) {
+                      setState(() {
+                        return error = 'Invalid Email';
+                      });
+                    }
+                  }
                 },
               ),
+              SizedBox(height: 12),
+              Text(error, style: TextStyle(color: Colors.red, fontSize: 14)),
             ],
           ),
         ),
