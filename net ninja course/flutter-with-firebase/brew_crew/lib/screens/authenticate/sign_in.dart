@@ -1,4 +1,6 @@
 import 'package:brew_crew/services/auth.dart';
+import 'package:brew_crew/shared/constants.dart';
+import 'package:brew_crew/shared/loading.dart';
 import 'package:flutter/material.dart';
 
 class SignIn extends StatefulWidget {
@@ -15,7 +17,7 @@ class _SignInState extends State<SignIn> {
 
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
-
+  bool loading = false;
 
   // text field state
   String email = '';
@@ -24,7 +26,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? Loading() : Scaffold(
       backgroundColor: Colors.brown[100],
       appBar: AppBar(
         backgroundColor: Colors.brown[400],
@@ -48,6 +50,7 @@ class _SignInState extends State<SignIn> {
             children: <Widget>[
               SizedBox(height: 20,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Email'),
                 validator: (val) {
                   return val.isEmpty ? 'Please fill out the email feild.' : null;
                 },
@@ -59,6 +62,7 @@ class _SignInState extends State<SignIn> {
               ),
               SizedBox(height: 20,),
               TextFormField(
+                decoration: textInputDecoration.copyWith(hintText: 'Password'),
                 validator: (val) {
                   return val.length < 6 ? 'Password too short.' : null;
                 },
@@ -78,12 +82,17 @@ class _SignInState extends State<SignIn> {
                 ),
                 onPressed: () async {
                   if (_formKey.currentState.validate()){
-                    print('valid');
+                    print('validating');
+                    setState(() {
+                      loading = true;
+                      print ('loading = true');
+                    });
                     dynamic result = await _auth.
                     signInWithEmailAndPassword(email, password);
                     if (result == null) {
                       setState(() {
-                        return error = 'One or more credentials are false.';
+                        error = 'One or more credentials are false.';
+                        loading = false;
                       });
                     }
                   }
